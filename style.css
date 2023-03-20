@@ -31,7 +31,6 @@ header {
 
 .wordle-grid {
     text-align: center;
-    padding-top: 50px;
 }
 
 .letter-guess {
@@ -89,4 +88,25 @@ header {
 .end-words {
     font-size: 20px;
     margin-top: -10px;
+}
+
+.load-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+}
+
+.loader {
+    font-size: 40px;
+    animation: spin 1.5s linear infinite;
+}
+  
+/* rotates clockwise indefinitely */
+@keyframes spin {
+    from { transform: rotate(360deg); }
+}
+
+.hide {
+    visibility: hidden;
 }

@@ -111,6 +111,7 @@ function invalidInputBorderBlink(elements, elementNumber) {
 }
 
 async function validateGuess(wordGuessed) {
+    setLoading(true);
     try {
         const promise = await fetch("https://words.dev-apis.com/validate-word", {
             method: "POST",
@@ -118,6 +119,7 @@ async function validateGuess(wordGuessed) {
         });
         const response = await promise.json();
         const isValid = response.validWord;
+        setLoading(false);
         return isValid;
     } catch (err) {
         console.log("An error has occured while validating guess: " + err);
@@ -163,4 +165,8 @@ function paintBlocks(listOfColors, elements, elementNumber) {
         elements[i].style.borderColor = listOfColors[colorCounter]
         colorCounter++;
     }
+}
+
+function setLoading(isLoading) {
+    document.querySelector(".load-bar").classList.toggle("hide", !isLoading);
 }
