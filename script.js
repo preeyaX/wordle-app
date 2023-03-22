@@ -72,44 +72,6 @@ function refocus(elementToBlur, elementToFocus) {
     elementToFocus.onblur = function() { this.focus() } // and when an input field is in focus, it cannot be blurred by manual click
 }
 
-function handleGuess(wordGuessed, elements, elementNumber) {
-    getWordOfDay().then(function(wordOfDay) { // only once the word of the day is received can we move forward
-        validateGuess(wordGuessed).then(function(isValid) {
-            if (isValid) {
-                // change input block colors
-                const colorsList = handleLetterColors(wordGuessed, wordOfDay);
-                paintBlocks(colorsList, elements, elementNumber);
-
-                if (wordGuessed === wordOfDay) { // correct guess
-                    document.querySelector(".end-of-program").style.color = "#00ff00";
-                    document.querySelector(".end-heading").innerText = "YOU WIN!";
-                    document.querySelector(".end-words").innerText = "You guessed the correct word.";
-                } else { // wrong guess
-                    if (elementNumber < elements.length - 1) {
-                        refocus(elements[elementNumber], elements[elementNumber + 1])
-                    } else {
-                        document.querySelector(".end-of-program").style.color = "red";
-                        document.querySelector(".end-heading").innerText = "YOU LOST.";
-                        document.querySelector(".end-words").innerText = "The correct word was '" + wordOfDay.toUpperCase() + "'";
-                    }
-                }
-            } else { // word doesn't exist
-                invalidInputBorderBlink(elements, elementNumber);
-            }
-        });
-    });
-}
-
-function invalidInputBorderBlink(elements, elementNumber) {
-    for (let i = (elementNumber + 1) - WORD_LENGTH; i < (elementNumber + 1); i++) {
-        elements[i].classList.remove("border-blink");
-
-        setTimeout(function() {
-            elements[i].classList.add("border-blink");
-        }, 10);
-    }
-}
-
 async function validateGuess(wordGuessed) {
     setLoading(true);
     try {
@@ -134,6 +96,42 @@ async function getWordOfDay() {
         return wordOfDay;
     } catch (err) {
         console.log("An error has occured while getting the word of the day: " + err);
+    }
+}
+
+async function handleGuess(wordGuessed, elements, elementNumber) {
+    const wordOfDay = await getWordOfDay(); // first get the word of the day
+    const isValid = await validateGuess(wordGuessed); // only then validate the guess
+
+    if (isValid) {
+        const colorsList = handleLetterColors(wordGuessed, wordOfDay);
+        paintBlocks(colorsList, elements, elementNumber);
+
+        if (wordGuessed === wordOfDay) { // correct guess
+            document.querySelector(".end-of-program").style.color = "#00ff00";
+            document.querySelector(".end-heading").innerText = "YOU WIN!";
+            document.querySelector(".end-words").innerText = "You guessed the correct word.";
+        } else { // wrong guess
+            if (elementNumber < elements.length - 1) {
+                refocus(elements[elementNumber], elements[elementNumber + 1])
+            } else {
+                document.querySelector(".end-of-program").style.color = "red";
+                document.querySelector(".end-heading").innerText = "YOU LOST.";
+                document.querySelector(".end-words").innerText = "The correct word was '" + wordOfDay.toUpperCase() + "'";
+            }
+        }
+    } else { // if the guess is not a word
+        invalidInputBorderBlink(elements, elementNumber);
+    }
+}
+
+function invalidInputBorderBlink(elements, elementNumber) {
+    for (let i = (elementNumber + 1) - WORD_LENGTH; i < (elementNumber + 1); i++) {
+        elements[i].classList.remove("border-blink");
+
+        setTimeout(function() {
+            elements[i].classList.add("border-blink");
+        }, 10);
     }
 }
 
