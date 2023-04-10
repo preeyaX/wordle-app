@@ -1,4 +1,5 @@
 const WORD_LENGTH = 5;
+let LIST_OF_GUESSES = [];
 
 function init() {
     const allLetterInputs = document.querySelectorAll(".letter-guess"); // gets all 30 letter inputs
@@ -106,6 +107,7 @@ async function handleGuess(wordGuessed, elements, elementNumber) {
     if (isValid) {
         const colorsList = handleLetterColors(wordGuessed, wordOfDay);
         paintBlocks(colorsList, elements, elementNumber);
+        postWordToDb(wordGuessed, elementNumber);
 
         if (wordGuessed === wordOfDay) { // correct guess
             document.querySelector(".end-of-program").style.color = "#00ff00";
@@ -118,10 +120,30 @@ async function handleGuess(wordGuessed, elements, elementNumber) {
                 document.querySelector(".end-of-program").style.color = "red";
                 document.querySelector(".end-heading").innerText = "YOU LOST.";
                 document.querySelector(".end-words").innerText = "The correct word was '" + wordOfDay.toUpperCase() + "'";
+                console.log("All guesses as from Db: " + LIST_OF_GUESSES);
             }
         }
     } else { // if the guess is not a word
         invalidInputBorderBlink(elements, elementNumber);
+    }
+}
+
+async function postWordToDb(wordGuessed, elementNumber) {
+    try {
+        const promise = await fetch('/post', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                'word': wordGuessed,
+                'guessNumber': (elementNumber + 1)/5
+            })
+        });
+        const res = await promise.json();
+        LIST_OF_GUESSES.push(res.word);
+    } catch (err) {
+        console.log("Unable to post word to Db: " + err);
     }
 }
 
